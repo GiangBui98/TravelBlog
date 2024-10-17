@@ -1,0 +1,1 @@
+﻿Scaffold-DbContext "Server=localhost\SQLEXPRESS;Initial Catalog=TravelBlog;Integrated Security=SSPI;persist security info=True;" Microsoft.EntityFrameworkCore.SqlServer -OutputDir DataAccess -Force
