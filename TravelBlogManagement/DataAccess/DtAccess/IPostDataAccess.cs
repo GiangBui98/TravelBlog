@@ -9,7 +9,7 @@ namespace TravelBlogManagement.DataAccess.DtAccess
 {
     public interface IPostDataAccess
     {
-        public void CreatedPost(int currentUserId, string title, string content, string tag);
+        public Post CreatedPost(int currentUserId, string title, string content, string tag);
         public void ViewPostDetails(int postId);
 
         public void UpdatePost(int currentUserId, int postId, string title, string content);
@@ -29,5 +29,8 @@ namespace TravelBlogManagement.DataAccess.DtAccess
         public void AddPostReaction(int userId, int postId, int reaction);
 
         public List<GetPostListResponse> GetPostList();
+
+        public List<Post> GetPostListOfCurrentUser(int userId);
+        public List<Post> GetPostListExceptCurrentUser(int userId);
     }
 }

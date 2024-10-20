@@ -9,8 +9,8 @@ namespace TravelBlogManagement.DataAccess.DtAccess
     public interface IUserDataAccess
     {
 
-        public void Login(string username, string password);
-        public void Register(string username, string password);
+        public int Login(string username, string password);
+        public bool Register(string username, string password);
 
         public User GetUserByUserName(string username);
     }
