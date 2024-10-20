@@ -18,10 +18,9 @@ namespace TravelBlogManagement.Services
 
         public void Login(string username, string password)
         {
-            
-
             try 
-            { _userDataAccess.Login(username, password); 
+            { 
+                _userDataAccess.Login(username, password); 
             }
             catch (Exception ex)
             {
@@ -31,7 +30,13 @@ namespace TravelBlogManagement.Services
 
         public void Register(string username, string password)
         {
-            _userDataAccess.Register(username, password);
+            if(_userDataAccess.Register(username, password)) {
+                Console.WriteLine("Register successfully.");
+            }
+            else
+            {
+                Console.WriteLine("Please try again");
+            }
         }
 
        /* public bool Login(string username, string password) 

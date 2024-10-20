@@ -1,4 +1,5 @@
 ﻿using System.Security.Cryptography.X509Certificates;
+using TravelBlogManagement.DataAccess;
 using TravelBlogManagement.DataAccess.DtAccess;
 using TravelBlogManagement.Services.MessageResponse;
 using TravelBlogManagement.Services.Models;
@@ -15,18 +16,8 @@ namespace TravelBlogManagement.Services
             _postDataAccess = postDataAccess;
         }
 
-        public void AddComment(int postId, string comment)
-        {
-            _postDataAccess.AddComment((int)SystemVariables.currentUserId, postId, comment);
-        }
-
-        public void AddPostReaction(int postId, int reaction)
-        {
-            _postDataAccess.AddPostReaction((int)SystemVariables.currentUserId, postId, reaction);
-        }
-
         public void CreatePost(string title, string content, string tagContent)
-        {            
+        {
             int tagLength = tagContent.Length;
             bool isTagContentNullOrSpace = string.IsNullOrWhiteSpace(tagContent);
 
@@ -42,8 +33,20 @@ namespace TravelBlogManagement.Services
             {
                 _postDataAccess.CreatedPost((int)SystemVariables.currentUserId, title, content, tagContent);
             }
-            
+
         }
+
+        public void AddComment(int postId, string comment)
+        {
+            _postDataAccess.AddComment((int)SystemVariables.currentUserId, postId, comment);
+        }
+
+        public void AddPostReaction(int postId, int reaction)
+        {
+            _postDataAccess.AddPostReaction((int)SystemVariables.currentUserId, postId, reaction);
+        }
+
+        
 
         public void OrderPostByPublishedDate()
         {
@@ -100,6 +103,25 @@ namespace TravelBlogManagement.Services
             foreach (var item in listResult)
             {
                 Console.WriteLine($"Post Id: {item.PostId} - Title: {item.Title}");
+            }
+        }
+
+        public void GetPostListOfCurrentUser()
+        {
+            var listResult = _postDataAccess.GetPostListOfCurrentUser((int)SystemVariables.currentUserId);
+
+            foreach (var item in listResult)
+            {
+                Console.WriteLine($"Id: {item.PostId}");
+            }
+        }
+        public void GetPostListExceptCurrentUser()
+        {
+            var listResult = _postDataAccess.GetPostListOfCurrentUser((int)SystemVariables.currentUserId);
+
+            foreach (var item in listResult)
+            {
+                Console.WriteLine($"Id: {item.PostId}");
             }
         }
 

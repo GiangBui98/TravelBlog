@@ -27,5 +27,7 @@ namespace TravelBlogManagement.Services
         public void AddPostReaction(int postId, int reaction);
 
         public void GetPostList();
+        public void GetPostListOfCurrentUser();
+        public void GetPostListExceptCurrentUser();
     } 
 }
