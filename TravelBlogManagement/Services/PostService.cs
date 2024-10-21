@@ -16,24 +16,19 @@ namespace TravelBlogManagement.Services
             _postDataAccess = postDataAccess;
         }
 
-        public void CreatePost(string title, string content, string tagContent)
+        public Post CreatePost(string title, string content, string tags)
         {
-            int tagLength = tagContent.Length;
-            bool isTagContentNullOrSpace = string.IsNullOrWhiteSpace(tagContent);
+                var tagList = tags.Split(';').ToList();
+                foreach (var tag in tagList)
+                {
+                    var tagLength = tag.Length;
+                    if ((tagLength > 0 && tagLength < 3) || tagLength > 10 || tagLength == 0)
+                    {
+                        throw new Exception("Each tag must be between 3 and 10 characters.");
+                    }                   
+                }
 
-            if (isTagContentNullOrSpace)
-            {
-                _postTagMessage.TagContentContainWhiteSpace();
-            }
-            else if ((tagLength > 0 && tagLength < 3) || tagLength > 10)
-            {
-                _postTagMessage.TagContentViolateLength();
-            }
-            else
-            {
-                _postDataAccess.CreatedPost((int)SystemVariables.currentUserId, title, content, tagContent);
-            }
-
+            return _postDataAccess.CreatedPost((int)SystemVariables.currentUserId, title, content, tags);
         }
 
         public void AddComment(int postId, string comment)
@@ -44,9 +39,7 @@ namespace TravelBlogManagement.Services
         public void AddPostReaction(int postId, int reaction)
         {
             _postDataAccess.AddPostReaction((int)SystemVariables.currentUserId, postId, reaction);
-        }
-
-        
+        }        
 
         public void OrderPostByPublishedDate()
         {
@@ -69,60 +62,41 @@ namespace TravelBlogManagement.Services
             _postDataAccess.UpdatePost((int)SystemVariables.currentUserId, postId, title, content);
         }
 
-        public void ViewCommentHistories(int commentId)
+        public List<UserCommentHistory> ViewCommentHistories(int commentId)
         {
-           var listResult = _postDataAccess.ViewCommentHistories(commentId);
-
-            if(listResult.Count == 1)
-            {
-                Console.WriteLine("'This is the latest comment");
-                Console.WriteLine(listResult[0].Content + " - " + listResult[0].CreatedDate);
-            } 
-            else
-            {
-                foreach (var item in listResult)
-                {
-                    Console.WriteLine(item.Content + " - " + item.CreatedDate);
-                }
-            }
+           return _postDataAccess.ViewCommentHistories(commentId);
         }
 
-        public void ViewCommentsInPost(int postId)
+        public List<CommentOfPostResponse> ViewCommentsInPost(int postId)
         {
-            _postDataAccess.ViewCommentsInPost(postId);
+            return _postDataAccess.ViewCommentsInPost(postId);
         }
 
         public void ViewPostDetails(int postId)
-        {
+        { 
             _postDataAccess.ViewPostDetails(postId);
+
         }
-        public void GetPostList()
+        public List<GetPostListResponse> GetPostList()
         {
             var listResult = _postDataAccess.GetPostList();
 
-            foreach (var item in listResult)
-            {
-                Console.WriteLine($"Post Id: {item.PostId} - Title: {item.Title}");
-            }
+            return listResult;
         }
 
-        public void GetPostListOfCurrentUser()
+        public List<Post> GetPostListOfCurrentUser()
         {
             var listResult = _postDataAccess.GetPostListOfCurrentUser((int)SystemVariables.currentUserId);
 
-            foreach (var item in listResult)
-            {
-                Console.WriteLine($"Id: {item.PostId}");
-            }
+            return listResult;
         }
-        public void GetPostListExceptCurrentUser()
+        public List<Post> GetPostListExceptCurrentUser()
         {
-            var listResult = _postDataAccess.GetPostListOfCurrentUser((int)SystemVariables.currentUserId);
-
-            foreach (var item in listResult)
-            {
-                Console.WriteLine($"Id: {item.PostId}");
-            }
+            return _postDataAccess.GetPostListOfCurrentUser((int)SystemVariables.currentUserId);
+        }
+        public List<UserCommentHistory> GetCommentList()
+        {
+            return _postDataAccess.GetCommentList();
         }
 
     }

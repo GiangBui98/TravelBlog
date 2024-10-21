@@ -22,7 +22,7 @@ namespace TravelBlogManagement.DataAccess.DtAccess
 
         public void UpdateComment(int currentUserId, int postId, int commentId, string comment);
 
-        public void ViewCommentsInPost(int postId);
+        public List<CommentOfPostResponse> ViewCommentsInPost(int postId);
 
         public List<UserCommentHistory> ViewCommentHistories(int commentId);
 
@@ -31,6 +31,9 @@ namespace TravelBlogManagement.DataAccess.DtAccess
         public List<GetPostListResponse> GetPostList();
 
         public List<Post> GetPostListOfCurrentUser(int userId);
+
         public List<Post> GetPostListExceptCurrentUser(int userId);
+
+        public List<UserCommentHistory> GetCommentList();
     }
 }

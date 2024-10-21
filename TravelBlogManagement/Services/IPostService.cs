@@ -1,4 +1,5 @@
 ﻿
+using TravelBlogManagement.DataAccess;
 using TravelBlogManagement.Services.Models;
 
 namespace TravelBlogManagement.Services
@@ -6,7 +7,7 @@ namespace TravelBlogManagement.Services
     public interface IPostService
     {
 
-        public void CreatePost(string title, string content, string tagContent);
+        public Post CreatePost(string title, string content, string tagContent);
 
         public void ViewPostDetails(int postId);
 
@@ -20,14 +21,16 @@ namespace TravelBlogManagement.Services
 
         public void UpdateComment(int postId, int commentId, string comment);
 
-        public void ViewCommentsInPost(int postId);
+        public List<CommentOfPostResponse> ViewCommentsInPost(int postId);
 
-        public void ViewCommentHistories(int commentId);
+        public List<UserCommentHistory> ViewCommentHistories(int commentId);
 
         public void AddPostReaction(int postId, int reaction);
 
-        public void GetPostList();
-        public void GetPostListOfCurrentUser();
-        public void GetPostListExceptCurrentUser();
+        public List<GetPostListResponse> GetPostList();
+        public List<Post> GetPostListOfCurrentUser();
+        public List<Post> GetPostListExceptCurrentUser();
+
+        public List<UserCommentHistory> GetCommentList();
     } 
 }

@@ -1,4 +1,5 @@
-﻿using TravelBlogManagement.Services;
+﻿using System.Reflection.Metadata.Ecma335;
+using TravelBlogManagement.Services;
 
 namespace TravelBlogManagement.DataAccess.DtAccess
 {
@@ -11,7 +12,7 @@ namespace TravelBlogManagement.DataAccess.DtAccess
             _context = context;
         }
 
-        public void Register(string username, string password)
+        public bool Register(string username, string password)
         {
             var checkUserExist = _context.Set<User>().FirstOrDefault(x => x.Name.ToLower() == username.ToLower());
             if (checkUserExist == null)
@@ -22,10 +23,13 @@ namespace TravelBlogManagement.DataAccess.DtAccess
 
                 _context.Set<User>().Add(newUser);
                 _context.SaveChanges();
+
+                return true;
             }
             else
             {
-                throw new Exception($"User name {username} existed. Please enter a new name.");
+                return false;
+                                
             }
         }
 
@@ -41,25 +45,22 @@ namespace TravelBlogManagement.DataAccess.DtAccess
             return user;
         }
 
-        public void Login(string username, string password)
+        public int Login(string username, string password)
         {
             var checkUserNameExist = _context.Set<User>().FirstOrDefault(x => x.Name.ToLower() == username.ToLower());
-            if (checkUserNameExist != null)
+
+            if(checkUserNameExist == null)
             {
-                if (checkUserNameExist.Password == HashPassword.GetMd5Hash(password))
-                {
-                    Console.WriteLine("Login successfully");
-                    SystemVariables.currentUserId = checkUserNameExist.UserId;
-                }
-                else
-                {
-                    Console.WriteLine("Incorrect credential.");
-                }
+                return 0;
             }
-            else
+            if(checkUserNameExist.Password != HashPassword.GetMd5Hash(password))
             {
-                throw new Exception($"User name {username} not existed. Please enter valid name.");
+                return 1;
             }
+            
+            SystemVariables.currentUserId = checkUserNameExist.UserId;
+            return 2;
+         
         }
     }
 }

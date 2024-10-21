@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Reflection.Metadata.Ecma335;
 using TravelBlogManagement.Services.MessageResponse;
 using TravelBlogManagement.Services.Models;
 
@@ -14,13 +15,87 @@ namespace TravelBlogManagement.DataAccess.DtAccess
             _context = context;
         }
 
+        public Post CreatedPost(int currentUserId, string title, string content, string tag)
+        {
+            var newpost = new Post();
+            newpost.Title = title;
+            newpost.Content = content;
+            newpost.CreatedDate = DateTime.Now;
+            newpost.CreatedUserId = currentUserId;
+            _context.Posts.Add(newpost);
+            _context.SaveChanges();
+
+            var lstTag = tag.Split(';');
+
+            var lstTagIds = new List<int>();
+
+            foreach (var tag1 in lstTag)
+            {
+                var check1 = _context.Set<Tag>().Where(t => t.TagContent.ToLower().Trim() == tag1.ToLower()).FirstOrDefault();
+
+                if (check1 != null)
+                {
+                    lstTagIds.Add(check1.TagId);
+                }
+                else
+                {
+                    var newtag = new Tag();
+                    newtag.TagContent = tag1;
+                    _context.Tags.Add(newtag);
+                    _context.SaveChanges();
+                    lstTagIds.Add(newtag.TagId);
+                }
+            }
+            foreach (var tagID in lstTagIds)
+            {
+                var postTag = new PostTag();
+                postTag.TagId = tagID;
+                postTag.PostId = newpost.PostId;
+                _context.PostTags.Add(postTag);
+                _context.SaveChanges();
+            }
+
+            return newpost;
+
+            /*
+                        int newPostTagId;
+
+                        var inputTag = _context.Set<Tag>().FirstOrDefault(x => x.TagContent == tag);
+                        //var inputTag1 = _context.Set<Tag>().Where()
+
+                        if (inputTag == null)
+                        {
+                            var newTagObject = new Tag { TagContent = tag };
+
+                            _context.Set<Tag>().Add(newTagObject);
+                            _context.SaveChanges();
+
+                            newPostTagId = newTagObject.TagId;
+                        }
+                        else
+                        {
+                            newPostTagId = inputTag.TagId;
+                        }
+
+                        var tagList = new List<PostTag>
+                        {
+                            new PostTag { TagId = newPostTagId }
+                        };
+
+
+                        var post = _context.Set<Post>().Add(new Post
+                        {
+                            Title = title,
+                            Content = content,                
+                            PostTags = tagList,                
+                            CreatedDate = DateTime.Now,
+
+                        }) ;
+
+                        _context.SaveChanges();*/
+        }
         public void AddComment(int currentUserId, int postId, string comment)
         {
-
-            //1. Check postId
-            //2. if postId != null --> add cmt --> then add cmt in cmthistory tbl
-            // elfe {error msg}
-
             var getPost = _context.Set<Post>()
                 .Where(p => p.PostId == postId)
                 .FirstOrDefault();
@@ -41,20 +116,11 @@ namespace TravelBlogManagement.DataAccess.DtAccess
 
                 _context.UserCommentHistories.Add(userCommentHistoryAdded);
                 _context.SaveChanges();
-            }
-            else
-            {
-                throw new Exception($"Post with id {postId} not found.");
-            }
+            }           
         }
 
         public void UpdateComment(int currentUserId, int postId, int userCommentId, string comment)
         {
-
-            //1. user select post
-            //2. check if current has cmt 
-            // if yes -> update cmt in UserComment tbl && create new record in UserCmtHistory tbl
-
             var postCommentOfCurrentUser = _context.Set<UserComment>()
                 .Where(p => p.UserId == currentUserId && p.PostId == postId)                
                 .ToList();
@@ -92,123 +158,65 @@ namespace TravelBlogManagement.DataAccess.DtAccess
 
             if(getPost != null)
             {
-                if (getPost.CreatedUserId == currentUserId)
-                {
-                    throw new Exception("Owner of the post cannot add reaction.");
+                  UserReaction userReaction = new UserReaction();
+                  userReaction.UserId = currentUserId;
+                  userReaction.PostId = postId;
+                  userReaction.Reaction = reaction;
 
-                }
-                else
-                {
-                    UserReaction userReaction = new UserReaction();
-                    userReaction.UserId = currentUserId;
-                    userReaction.PostId = postId;
-                    userReaction.Reaction = reaction;
-
-                    _context.UserReactions.Add(userReaction); 
-                    _context.SaveChanges();
-                }
-            }
-            else
-            {
-                throw new Exception($"Post id {postId} not existed.");
-            }
+                  _context.UserReactions.Add(userReaction); 
+                  _context.SaveChanges();
+            }           
         }
-
-        public void CreatedPost(int currentUserId, string title, string content, string tag)
-        {
-            //Step
-            //1. create post
-            //2. check tag
-            //add postTag into PostTag tbl
-            
-
-            //1. Tạo bài viết          
-            var newpost = new Post();
-            newpost.Title = title;
-            newpost.Content = content;
-            newpost.CreatedDate = DateTime.Now;
-            newpost.CreatedUserId = currentUserId;
-            _context.Posts.Add(newpost);
-            _context.SaveChanges(); //lưu csdl => có PostId
-            //2. Kiểm tra danh sách tag, chưa có thì lưu tag vào CSDL
-
-            var lstTag = tag.Split(';');
-
-            var lstTagIds = new List<int>();//khai báo để dùng ở step  3
-
-            foreach(var tag1 in lstTag)
-            {
-                var check1 = _context.Set<Tag>().Where(t => t.TagContent.ToLower().Trim() == tag1.ToLower()).FirstOrDefault();
-                //
-                if(check1 != null)
-                {
-                    //đã có
-                    lstTagIds.Add(check1.TagId);
-                }
-                else
-                {
-                    //chưa có, thêm mới tag
-                    var newtag = new Tag();
-                    newtag.TagContent = tag1;
-                    _context.Tags.Add(newtag);//chưa save
-                    _context.SaveChanges() ;//có tag id
-                    lstTagIds.Add(newtag.TagId);
-                }
-            }
-
-            //3. Liên kết bài viết với danh sách tag ban đầu.
-            //lstTagIds
-
-            foreach(var tagID in lstTagIds) {
-                var postTag = new PostTag();
-                postTag.TagId = tagID;
-                postTag.PostId = newpost.PostId;
-                _context.PostTags.Add(postTag);
-                _context.SaveChanges();
-            }
-
-/*
-            int newPostTagId;
-           
-            var inputTag = _context.Set<Tag>().FirstOrDefault(x => x.TagContent == tag);
-            //var inputTag1 = _context.Set<Tag>().Where()
-
-            if (inputTag == null)
-            {
-                var newTagObject = new Tag { TagContent = tag };
-
-                _context.Set<Tag>().Add(newTagObject);
-                _context.SaveChanges();
-
-                newPostTagId = newTagObject.TagId;
-            }
-            else
-            {
-                newPostTagId = inputTag.TagId;
-            }
-
-            var tagList = new List<PostTag>
-            {
-                new PostTag { TagId = newPostTagId }
-            };
-
-
-            var post = _context.Set<Post>().Add(new Post
-            {
-                Title = title,
-                Content = content,                
-                PostTags = tagList,                
-                CreatedDate = DateTime.Now,
-
-            }) ;
-
-            _context.SaveChanges();*/
-        }
-
+      
         public void ViewPostDetails(int postId)
         {
-            //requirement: view all things relate to post: including interaction and comments
+            var postDetail = _context.Set<Post>()
+                .Where(p => p.PostId == postId).FirstOrDefault();
 
+            var commentsOfPost = _context.Set<UserComment>()
+                 .Where(p => p.PostId == postId)
+                 .Select(p => new CommentOfPostResponse
+                 {
+                     Username = p.User.Name,
+                     Comment = p.Content,
+
+                 })
+                 .ToList();
+
+            var reactionsOfPost = _context.Set<UserReaction>()
+                .Where(p => p.PostId == postId)
+                .Select(p => new ReactionOfPostResponse
+                {
+                    Username = p.User.Name,                  
+                    Reaction = p.Reaction,
+                })
+                .ToList();
+
+            if (postDetail != null)
+            {
+                Console.WriteLine("Post Details:");
+                Console.WriteLine($"Post ID: {postDetail.PostId}");
+                Console.WriteLine($"Title: {postDetail.Title}");
+                Console.WriteLine($"Content: {postDetail.Content}");
+                Console.WriteLine($"Created Date: {postDetail.CreatedDate}");
+                Console.WriteLine("All comments of post: ");
+                foreach (var value in commentsOfPost)
+                {
+                    Console.WriteLine($"User: {value.Username}");
+                    Console.WriteLine($"Comment: {value.Comment}");
+                }
+
+                Console.WriteLine("All reactions of post: ");
+                foreach (var value in reactionsOfPost)
+                {
+                    Console.WriteLine($"User: {value.Username}");
+                    Console.WriteLine($"Comment: {value.Reaction}");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"No post found with ID: {postId}");
+            }
         }
 
         public void UpdatePost(int currentUserId, int postId, string title, string content)
@@ -216,25 +224,13 @@ namespace TravelBlogManagement.DataAccess.DtAccess
             var getPostToUpdate = _context.Set<Post>().Where(x => x.PostId == postId).FirstOrDefault();
 
             if (getPostToUpdate != null)
-            {
-                if(getPostToUpdate.CreatedUserId == currentUserId)
-                {
-                    getPostToUpdate.Title = title;
-                    getPostToUpdate.Content = content;
-                    getPostToUpdate.UpdatedDate = DateTime.Now;
+            {  
+                getPostToUpdate.Title = title;
+                getPostToUpdate.Content = content;
+                getPostToUpdate.UpdatedDate = DateTime.Now;
 
-                    _context.Entry(getPostToUpdate).State = EntityState.Modified;
-                    _context.SaveChanges();
-                }
-                else
-                {
-                    Console.WriteLine("You're not owner of post.");
-                }
-                
-            }
-            else
-            {
-                _postTagMessage.PostIdNotExisted();
+                _context.Entry(getPostToUpdate).State = EntityState.Modified;
+                _context.SaveChanges();                
             }
         }
 
@@ -266,10 +262,32 @@ namespace TravelBlogManagement.DataAccess.DtAccess
                   })
                  .ToList();
 
-            foreach (var item in listPostIdViaSearchedResult)
+            if(listPostIdViaSearchedResult.Count == 0)
             {
-                Console.WriteLine($"Post Id: {item.PostId}, Post Title: {item.Title}, Tag Content: {item.TagContent}");
+                throw new Exception("No record found.");
             }
+            else
+            {
+                foreach (var item in listPostIdViaSearchedResult)
+                {
+                    Console.WriteLine($"Post Id: {item.PostId}, Post Title: {item.Title} ,Tag Content: {item.TagContent}");
+                }
+            }            
+        }
+
+        public List<CommentOfPostResponse> ViewCommentsInPost(int postId)
+        {
+            var commentsOfPost = _context.Set<UserComment>()
+                .Where(p => p.PostId == postId)
+                .Select(p => new CommentOfPostResponse
+                {
+                    Username = p.User.Name,
+                    Comment = p.Content
+
+                })
+                .ToList();
+
+            return commentsOfPost;
         }
 
         public List<UserCommentHistory> ViewCommentHistories(int commentId)
@@ -279,29 +297,6 @@ namespace TravelBlogManagement.DataAccess.DtAccess
                 .ToList() ;
 
             return getCommentHistory;
-        }
-
-        public void ViewCommentsInPost(int postId)
-        {
-            var commentsOfPost = _context.Set<UserComment>()
-                .Where(p => p.PostId == postId)
-                .Select(p => new
-                {
-                    p.User.Name,
-                    p.Content
-                    
-                })
-                .ToList();
-            
-            var reactionsOfPost = _context.Set<UserReaction>()
-                .Where(p => p.PostId == postId)
-                .Select(p => new
-                {
-                    p.User.Name,
-                    p.Reaction
-                })
-                .ToList();
-
         }
 
         public List<GetPostListResponse> GetPostList()
@@ -317,7 +312,31 @@ namespace TravelBlogManagement.DataAccess.DtAccess
             return postList;
         }
 
-        
+        public List<Post> GetPostListOfCurrentUser(int userId)
+        {
+            var postList = _context.Set<Post>()
+                .Where(p => p.CreatedUserId == userId)
+                .ToList();
+
+            return postList;
+        }
+
+        public List<Post> GetPostListExceptCurrentUser(int userId)
+        {
+            var postList = _context.Set<Post>()
+               .Where(p => p.CreatedUserId != userId)
+               .ToList();
+
+            return postList;
+        }
+
+        public List<UserCommentHistory> GetCommentList()
+        {
+            var getList = _context.Set<UserCommentHistory>()
+                .Distinct()
+                .ToList() ;
+            return getList;
+        }
     }
     
 }

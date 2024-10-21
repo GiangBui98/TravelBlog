@@ -8,11 +8,11 @@ namespace TravelBlogManagement.Services
 {
     public interface IUserService
     {
-        public void Register(string name, string password);
+        public bool Register(string name, string password);
 
        // public bool Login(string name, string password);
 
-        public void Login(string username, string password);
+        public int Login(string username, string password);
 
     }
 }
