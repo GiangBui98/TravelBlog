@@ -1,5 +1,4 @@
-﻿using System.Reflection.Metadata.Ecma335;
-using TravelBlogManagement.Services;
+﻿using TravelBlogManagement.Services;
 
 namespace TravelBlogManagement.DataAccess.DtAccess
 {
@@ -15,29 +14,28 @@ namespace TravelBlogManagement.DataAccess.DtAccess
         public bool Register(string username, string password)
         {
             var checkUserExist = _context.Set<User>().FirstOrDefault(x => x.Name.ToLower() == username.ToLower());
-            if (checkUserExist == null)
-            {
-                var newUser = new User();
-                newUser.Name = username;
-                newUser.Password = HashPassword.GetMd5Hash(password);
-
-                _context.Set<User>().Add(newUser);
-                _context.SaveChanges();
-
-                return true;
-            }
-            else
+            if (checkUserExist != null)
             {
                 return false;
-                                
             }
+
+            var newUser = new User
+            {
+                Name = username,
+                Password = HashPassword.GetMd5Hash(password)
+            };
+
+            _context.Set<User>().Add(newUser);
+            _context.SaveChanges();
+
+            return true;
         }
 
         public User GetUserByUserName(string username)
         {
             var user = _context.Set<User>().FirstOrDefault(x => x.Name == username);
 
-            if (user == null) 
+            if (user == null)
             {
                 throw new Exception($"User name {username} not existed. Please enter valid name.");
             }
@@ -45,22 +43,22 @@ namespace TravelBlogManagement.DataAccess.DtAccess
             return user;
         }
 
-        public int Login(string username, string password)
+        public bool Login(string username, string password)
         {
-            var checkUserNameExist = _context.Set<User>().FirstOrDefault(x => x.Name.ToLower() == username.ToLower());
+            var existingUser = _context.Set<User>().FirstOrDefault(x => x.Name.ToLower() == username.ToLower());
 
-            if(checkUserNameExist == null)
+            if (existingUser == null)
             {
-                return 0;
+                throw new Exception($"{username} is not registered.");
             }
-            if(checkUserNameExist.Password != HashPassword.GetMd5Hash(password))
+
+            if (existingUser.Password != HashPassword.GetMd5Hash(password))
             {
-                return 1;
+                throw new Exception($"{username} - Password is not correct.");
             }
-            
-            SystemVariables.currentUserId = checkUserNameExist.UserId;
-            return 2;
-         
+
+            SystemVariables.currentUserId = existingUser.UserId;
+            return true;
         }
     }
 }

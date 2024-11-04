@@ -1,20 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TravelBlogManagement.Services.Models;
+﻿using TravelBlogManagement.Services.Models;
 
 namespace TravelBlogManagement.DataAccess.DtAccess
 {
     public interface IPostDataAccess
     {
         public Post CreatedPost(int currentUserId, string title, string content, string tag);
-        public void ViewPostDetails(int postId);
 
-        public void UpdatePost(int currentUserId, int postId, string title, string content);
+        public Post CreateANewPost(int currentUserId, string title, string content, string tag);
+        
+        public ViewPostDetailsResponse ViewPostDetails(int postId);
 
-        public void SearchForTagsOrTitle(string searchingText);
+        public Post UpdatePost(int currentUserId, int postId, string title, string content);
+
+        public List<SearchForTagsOrTitleResponse> SearchForTagsOrTitle(string searchingText);
 
         public void OrderPostByPublishedDate();
 
@@ -34,6 +32,8 @@ namespace TravelBlogManagement.DataAccess.DtAccess
 
         public List<Post> GetPostListExceptCurrentUser(int userId);
 
-        public List<UserCommentHistory> GetCommentList();
+        public List<int?> GetCommentIdList();
+
+        public List<CommentListResponse> GetCommentListOfCurrentuser();
     }
 }

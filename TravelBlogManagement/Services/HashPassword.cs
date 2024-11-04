@@ -7,7 +7,6 @@ namespace TravelBlogManagement.Services
     {
         public static string GetMd5Hash(string input)
         {
-
             var md5Hash = MD5.Create();
 
             // Convert the input string to a byte array and compute the hash.

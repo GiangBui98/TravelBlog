@@ -1,19 +1,19 @@
-﻿
-using TravelBlogManagement.DataAccess;
+﻿using TravelBlogManagement.DataAccess;
 using TravelBlogManagement.Services.Models;
 
 namespace TravelBlogManagement.Services
 {
     public interface IPostService
     {
-
         public Post CreatePost(string title, string content, string tagContent);
 
-        public void ViewPostDetails(int postId);
+        public Post CreateANewPost(string title, string content, string tagContent);
 
-        public void UpdatePost(int postId, string title, string content);
+        public ViewPostDetailsResponse ViewPostDetails(int postId);
 
-        public void SearchForTagsOrTitle(string searchingText);
+        public Post UpdatePost(int postId, string title, string content);
+
+        public List<SearchForTagsOrTitleResponse> SearchForTagsOrTitle(string searchingText);
 
         public void OrderPostByPublishedDate();
 
@@ -28,9 +28,13 @@ namespace TravelBlogManagement.Services
         public void AddPostReaction(int postId, int reaction);
 
         public List<GetPostListResponse> GetPostList();
+
         public List<Post> GetPostListOfCurrentUser();
+
         public List<Post> GetPostListExceptCurrentUser();
 
-        public List<UserCommentHistory> GetCommentList();
+        public List<int?> GetCommentIdList();
+
+        public List<CommentListResponse> GetCommentListOfCurrentuser();
     } 
 }
