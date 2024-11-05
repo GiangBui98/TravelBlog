@@ -128,12 +128,12 @@ namespace TravelBlogManagement.DataAccess.DtAccess
                 else
                 {
                     tagToAdd = new Tag { TagContent = item.ToLower().Trim() };
-                    _context.Tags.Add(tagToAdd);
+                    //_context.Tags.Add(tagToAdd);
                 }
 
                 newPost.PostTags.Add(new PostTag { Tag = tagToAdd });
             }
-            _context.Posts.Add(newPost);
+            _context.Set<Post>().Add(newPost);
             _context.SaveChanges();
 
             return newPost;
@@ -192,6 +192,7 @@ namespace TravelBlogManagement.DataAccess.DtAccess
 
                 _context.UserCommentHistories.Add(userCommentHistory);
                 _context.Entry(existingComment).State = EntityState.Modified;
+
                 _context.SaveChanges();
 
             }
@@ -210,10 +211,12 @@ namespace TravelBlogManagement.DataAccess.DtAccess
 
             if (getPost != null)
             {
-                UserReaction userReaction = new UserReaction();
-                userReaction.UserId = currentUserId;
-                userReaction.PostId = postId;
-                userReaction.Reaction = reaction;
+                var userReaction = new UserReaction
+                {
+                    UserId = currentUserId,
+                    PostId = postId,
+                    Reaction = reaction,
+                };
 
                 _context.UserReactions.Add(userReaction);
                 _context.SaveChanges();
